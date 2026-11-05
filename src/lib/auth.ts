@@ -53,11 +53,11 @@ export async function createSession(user: SessionUser): Promise<string> {
 }
 
 export async function getSession(): Promise<SessionUser | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+    if (!token) return null;
+
     const { payload } = await jwtVerify(token, AUTH_SECRET);
     return {
       id: payload.sub as string,
@@ -71,8 +71,12 @@ export async function getSession(): Promise<SessionUser | null> {
 }
 
 export async function destroySession() {
-  const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  try {
+    const cookieStore = await cookies();
+    cookieStore.delete(COOKIE_NAME);
+  } catch {
+    // ignore
+  }
 }
 
 export async function requireAuth(
